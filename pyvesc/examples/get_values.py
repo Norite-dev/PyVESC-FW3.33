@@ -4,7 +4,7 @@ import serial
 import time
 
 # Set your serial port here (either /dev/ttyX or COMX)
-serialport = 'COM3'
+serialport = '/dev/tty.usbmodem301'
 
 def get_values_example():
     with serial.Serial(serialport, baudrate=115200, timeout=0.05) as ser:
