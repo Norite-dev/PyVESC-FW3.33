@@ -3,7 +3,7 @@
 
 from pyvesc.messages.base import VESCMessage
 
-class GetValues(metaclass=VESCMessage):
+class GetValues(metaclass=VESCMessage):    
     """ Gets internal sensor data
     """
     id = 4
@@ -23,7 +23,8 @@ class GetValues(metaclass=VESCMessage):
             ('watt_hours', 'f', 1),
             ('watt_hours_charged', 'f', 1),
             ('tachometer_value', 'i', 1),
-            ('tachometer_abs', 'i', 1)
+            ('tachometer_abs', 'i', 1),
+            ('fault', 'i', 1)
     ]
 
 
