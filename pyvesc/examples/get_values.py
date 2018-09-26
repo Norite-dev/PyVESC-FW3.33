@@ -35,7 +35,7 @@ def get_values_example():
                 # Check if there is enough data back for a measurement
                 if ser.in_waiting > 0:                   
                   inbuf += ser.read(ser.in_waiting)                 
-                  if len(inbuf) > 59:
+                if len(inbuf) > 59:
                     (response, consumed) = pyvesc.decode(inbuf)
                     if consumed > 0:                
                         #print("consumed " + str(consumed))                
@@ -46,7 +46,7 @@ def get_values_example():
                             if isinstance(response, GetFirmwareVersion):
                               print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
                             elif isinstance(response, GetValues):
-                              print("rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) )
+                              print("rpm: "+  str(response.rpm*1e42) + " volt: " + str(response.input_voltage*1e6) + " curr: " +str(response.avg_motor_current*1e42)  )
                               
                         except:
                             # ToDo: Figure out how to isolate rotor position and other sensor data
