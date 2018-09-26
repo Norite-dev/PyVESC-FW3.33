@@ -1,3 +1,6 @@
+# NOTE: this is for VESC firmware 3.33 
+# ( https://github.com/tlalexander/bldc/tree/e74d3a3e4c2047b239084c152b4cbfddafbe3145 )
+
 from pyvesc.messages.base import VESCMessage
 
 
@@ -53,7 +56,7 @@ class SetPosition(metaclass=VESCMessage):
     fields = [
         ('pos', 'i', 1000000)
     ]
-
+    
 class SetRotorPositionMode(metaclass=VESCMessage):
     """Sets the rotor position feedback mode.
         
