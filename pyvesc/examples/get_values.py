@@ -16,7 +16,7 @@ def get_values_example():
                 #    Note: if you want to set the real RPM you can set a scalar
                 #          manually in setters.py
                 #          12 poles and 19:1 gearbox would have a scalar of 1/228
-                ser.write(pyvesc.encode(SetRPM(10000)))
+                ser.write(pyvesc.encode(SetRPM(2000)))
 
                 # Request the current measurement from the vesc
                 ser.write(pyvesc.encode_request(GetValues))
