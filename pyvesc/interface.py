@@ -13,6 +13,12 @@ def decode(buffer):
              was parsed returns (None, 0).
     :rtype: `tuple`: (PyVESC message, int)
     """
+    s = '---decoding '
+    for c in buffer:
+      s += hex(c)
+      s += ','
+    s += '---'
+    print (s)
     msg_payload, consumed = pyvesc.packet.codec.unframe(buffer)
     if msg_payload:
         return pyvesc.messages.base.VESCMessage.unpack(msg_payload), consumed

@@ -22,7 +22,7 @@ def get_values_example():
                 ser.write(pyvesc.encode_request(GetValues))
 
                 # Check if there is enough data back for a measurement
-                if ser.in_waiting > 61:
+                if ser.in_waiting > 61:                   
                     (response, consumed) = pyvesc.decode(ser.read(61))
 
                     # Print out the values
