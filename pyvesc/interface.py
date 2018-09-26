@@ -1,6 +1,7 @@
 import pyvesc.messages.base
 import pyvesc.packet.codec
 
+dbg = False
 
 def decode(buffer):
     """
@@ -13,12 +14,13 @@ def decode(buffer):
              was parsed returns (None, 0).
     :rtype: `tuple`: (PyVESC message, int)
     """
-    s = '---decoding '
-    for c in buffer:
-      s += hex(c)
-      s += ','
-    s += '---'
-    print (s)
+    if dbg:
+      s = '---decode '
+      for c in buffer:
+        s += hex(c)
+        s += ','
+      s += '---'
+      print (s)
     msg_payload, consumed = pyvesc.packet.codec.unframe(buffer)
     if msg_payload:
         return pyvesc.messages.base.VESCMessage.unpack(msg_payload), consumed
@@ -39,6 +41,13 @@ def encode(msg):
     """
     msg_payload = pyvesc.messages.base.VESCMessage.pack(msg)
     packet = pyvesc.packet.codec.frame(msg_payload)
+    if dbg:
+      s = '---encode '
+      for c in packet:
+        s += hex(c)
+        s += ','
+      s += '---'
+      print (s)
     return packet
 
 
@@ -56,4 +65,11 @@ def encode_request(msg_cls):
     """
     msg_payload = pyvesc.messages.base.VESCMessage.pack(msg_cls, header_only=True)
     packet = pyvesc.packet.codec.frame(msg_payload)
+    if dbg:
+      s = '---encode_request '
+      for c in packet:
+        s += hex(c)
+        s += ','
+      s += '---'
+      print (s)
     return packet

@@ -3,10 +3,22 @@
 
 from pyvesc.messages.base import VESCMessage
 
+class GetFirmwareVersion(metaclass=VESCMessage):        
+    id = 0
+    can_id = None
+
+    fields = [
+            ('version_major', 'b', 1),
+            ('version_minor', 'b', 1)
+    ]
+
+
+
 class GetValues(metaclass=VESCMessage):    
     """ Gets internal sensor data
     """
     id = 4
+    can_id = None
 
     fields = [
             ('temp_fet_filtered', 'e', 1),
@@ -35,6 +47,7 @@ class GetRotorPosition(metaclass=VESCMessage):
     Mode 4). This is set by SetRotorPositionMode (id=21).
     """
     id = 39
+    can_id = None
 
     fields = [
             ('rotor_pos', 'i', 1)
