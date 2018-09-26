@@ -35,28 +35,29 @@ def get_values_example():
                 # Check if there is enough data back for a measurement
                 if ser.in_waiting > 0:                   
                   inbuf += ser.read(ser.in_waiting)                 
-                  (response, consumed) = pyvesc.decode(inbuf)
-                  if consumed > 0:                
-                      #print("consumed " + str(consumed))                
-                      inbuf = inbuf[consumed:]
-                      # Print out the values
-                      try:                                                
-                          #print("response " + str(response.id))
-                          if isinstance(response, GetFirmwareVersion):
-                            print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
-                          elif isinstance(response, GetValues):
-                            print("rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) )
-                            
-                      except:
-                          # ToDo: Figure out how to isolate rotor position and other sensor data
-                          #       in the incoming datastream
-                          #try:
-                          #    print(response.rotor_pos)
-                          #except:
-                          #    pass
-                          pass
+                  if len(inbuf) > 59:
+                    (response, consumed) = pyvesc.decode(inbuf)
+                    if consumed > 0:                
+                        #print("consumed " + str(consumed))                
+                        inbuf = inbuf[consumed:]
+                        # Print out the values
+                        try:                                                
+                            #print("response " + str(response.id))
+                            if isinstance(response, GetFirmwareVersion):
+                              print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
+                            elif isinstance(response, GetValues):
+                              print("rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) )
+                              
+                        except:
+                            # ToDo: Figure out how to isolate rotor position and other sensor data
+                            #       in the incoming datastream
+                            #try:
+                            #    print(response.rotor_pos)
+                            #except:
+                            #    pass
+                            pass
 
-                
+                  
 
         except KeyboardInterrupt:
             # Turn Off the VESC
