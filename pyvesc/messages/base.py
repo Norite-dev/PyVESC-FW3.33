@@ -97,7 +97,7 @@ class VESCMessage(type):
     @staticmethod
     def pack(instance, header_only = None):
         if header_only:
-            if hasattr(instance, 'can_id'):
+            if instance.can_id is not None:
                 fmt = VESCMessage._endian_fmt + VESCMessage._can_id_fmt + VESCMessage._id_fmt
                 values = (VESCMessage._comm_forward_can, instance.can_id, instance.id)
             else:
@@ -127,7 +127,8 @@ class VESCMessage(type):
             return struct.pack(fmt, *values)
         else:
             values = ((instance.id,) + tuple(field_values))
-            if hasattr(instance, 'can_id'):
+            #print(values)
+            if instance.can_id is not None:
                 fmt = VESCMessage._endian_fmt + VESCMessage._can_id_fmt + VESCMessage._id_fmt + instance._fmt_fields
                 values = (VESCMessage._comm_forward_can, instance.can_id) + values
             else:

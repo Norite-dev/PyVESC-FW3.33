@@ -10,6 +10,7 @@ class Sample1(metaclass=VESCMessage):
     """ sample answer
     """
     id = 0xAA
+    can_id = None
     
     temp_fet_filtered = 1
     temp_motor_filtered = 2
