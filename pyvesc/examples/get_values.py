@@ -102,7 +102,7 @@ def get_values_example():
                               rpm = response.rpm
                               voltage = response.input_voltage
                               current = response.avg_motor_current
-                              print("rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current)  )
+                              print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " tacho:" + str(response.tachometer_value)  )
                               
                         except:
                             # ToDo: Figure out how to isolate rotor position and other sensor data
