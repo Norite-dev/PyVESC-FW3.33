@@ -32,8 +32,8 @@ class GetValues(metaclass=VESCMessage):
             ('input_voltage', 'h', 10),
             ('amp_hours',  'f', 1),
             ('amp_hours_charged',  'f', 1),
-            ('watt_hours', 'f', 1),
-            ('watt_hours_charged', 'f', 1),
+            ('watt_hours', 'i', 10000),
+            ('watt_hours_charged', 'i', 10000),
             ('tachometer_value', 'i', 1),
             ('tachometer_abs_value', 'i', 1),
             ('fault', 'b', 1)
