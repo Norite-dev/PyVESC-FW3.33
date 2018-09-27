@@ -24,7 +24,7 @@ class GetValues(metaclass=VESCMessage):
             ('temp_fet_filtered', 'H', 10),
             ('temp_motor_filtered', 'e', 1),
             ('avg_motor_current', 'i', 100),
-            ('avg_input_current', 'f', 1),
+            ('avg_input_current', 'i', 100),
             ('avg_id', 'f', 1),
             ('avg_iq', 'f', 1),
             ('duty_cycle_now', 'h', 10),
