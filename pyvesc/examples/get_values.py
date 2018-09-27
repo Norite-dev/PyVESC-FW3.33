@@ -28,7 +28,7 @@ def get_values_example():
                 if time.time() > nextPingTime:
                   nextPingTime = time.time() + 0.5
                   ser.write(pyvesc.encode_request(GetValues))                                
-                  ser.write(pyvesc.encode(SetRPM(2000)))            
+                  ser.write(pyvesc.encode(SetRPM(3000)))            
 
                 time.sleep(0.01)
                 
@@ -46,7 +46,7 @@ def get_values_example():
                             if isinstance(response, GetFirmwareVersion):
                               print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
                             elif isinstance(response, GetValues):
-                              print("rpm: "+  str(response.rpm*1e42) + " volt: " + str(response.input_voltage*1e6) + " curr: " +str(response.avg_motor_current*1e42)  )
+                              print("rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current)  )
                               
                         except:
                             # ToDo: Figure out how to isolate rotor position and other sensor data
