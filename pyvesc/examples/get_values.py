@@ -55,7 +55,7 @@ def get_values_example():
             ser.flushOutput()
             # Optional: Turn on rotor position reading if an encoder is installed
             ser.write(pyvesc.encode_request(GetFirmwareVersion))                                    
-            #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_OFF)))                        
+            #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_ENCODER)))                        
             while True:
                 # Set the ERPM of the VESC motor
                 #    Note: if you want to set the real RPM you can set a scalar
@@ -68,7 +68,9 @@ def get_values_example():
                   ser.write(pyvesc.encode_request(GetValues))                                
                   ser.write(pyvesc.encode(SetRPM(3000)))
                 # Send SetDutyCycle (100% = 100000)
-                  #ser.write(pyvesc.encode(SetDutyCycle(5000)))  
+                  #ser.write(pyvesc.encode(SetDutyCycle(5000))) 
+                #Set rotor postion 
+                  ser.write(pyvesc.encode(SetPosition(250)))
                   # plot
                   y1 = y1[1:]
                   y1 = np.append(y1, voltage)
