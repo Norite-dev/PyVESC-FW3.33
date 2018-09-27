@@ -1,5 +1,5 @@
 import pyvesc
-from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition
+from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle
 import serial
 import time
 import matplotlib.pyplot as plt
@@ -66,7 +66,9 @@ def get_values_example():
                 if time.time() > nextPingTime:
                   nextPingTime = time.time() + 0.5
                   ser.write(pyvesc.encode_request(GetValues))                                
-                  ser.write(pyvesc.encode(SetRPM(3000)))            
+                  ser.write(pyvesc.encode(SetRPM(3000)))
+                # Send SetDutyCycle (100% = 100000)
+                  #ser.write(pyvesc.encode(SetDutyCycle(5000)))  
                   # plot
                   y1 = y1[1:]
                   y1 = np.append(y1, voltage)
