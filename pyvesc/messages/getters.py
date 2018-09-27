@@ -46,7 +46,7 @@ class GetRotorPosition(metaclass=VESCMessage):
     Must be set to DISP_POS_MODE_ENCODER or DISP_POS_MODE_PID_POS (Mode 3 or 
     Mode 4). This is set by SetRotorPositionMode (id=21).
     """
-    id = 39
+    id = 22
     can_id = None
 
     fields = [
