@@ -70,7 +70,7 @@ def get_values_example():
                 # Send SetDutyCycle (100% = 100000)
                   #ser.write(pyvesc.encode(SetDutyCycle(5000))) 
                 #Set rotor postion 
-                  ser.write(pyvesc.encode(SetPosition(250)))
+                  #ser.write(pyvesc.encode(SetPosition(250)))
                   # plot
                   y1 = y1[1:]
                   y1 = np.append(y1, voltage)
