@@ -24,11 +24,11 @@ def get_values_example():
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
     ax1.set_xlabel('time (s)')
-    ax1.set_ylabel('voltage', color='r')
+    ax1.set_ylabel('voltage (V)', color='r')
     ax1.set_ylim(0, 40)
 
     ax2 = ax1.twinx()
-    ax2.set_ylabel('current', color='g')
+    ax2.set_ylabel('current (A)', color='g')
     ax2.set_ylim(0, 40)
 
     ax3 = ax2.twinx()
