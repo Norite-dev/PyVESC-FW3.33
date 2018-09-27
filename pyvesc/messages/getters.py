@@ -27,7 +27,7 @@ class GetValues(metaclass=VESCMessage):
             ('avg_input_current', 'f', 1),
             ('avg_id', 'f', 1),
             ('avg_iq', 'f', 1),
-            ('duty_cycle_now',  'e', 1),
+            ('duty_cycle_now',  'h', 10),
             ('rpm', 'i', 1),
             ('input_voltage', 'h', 10),
             ('amp_hours',  'f', 1),
