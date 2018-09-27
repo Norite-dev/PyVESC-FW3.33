@@ -117,10 +117,14 @@ def get_values_example():
 
         except KeyboardInterrupt:
             # Turn Off the VESC
+            print ("turning off the VESC...")
             ser.write(pyvesc.encode(SetCurrent(0)))            
             ser.flushOutput()
             ser.flushInput()
-            pass
+            
 
 if __name__ == "__main__":
+    #signal.signal(signal.SIGINT, signal_handler)
     get_values_example()
+
+    
