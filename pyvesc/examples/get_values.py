@@ -13,6 +13,9 @@ print("port " + serialport)
 
 
 def get_values_example():    
+    # True: position control, False: speed control
+    POS_CONTROL = True
+    
     x = np.linspace(0, 100, 100)
     y1 = np.linspace(0, 0, 100)
     y2 = np.linspace(0, 0, 100)
@@ -32,8 +35,11 @@ def get_values_example():
     ax2.set_ylim(0, 40)
 
     ax3 = ax2.twinx()
-    ax3.set_ylabel('rpm', color='b')
-    ax3.set_ylim(0, 10000)
+    ax3.set_ylabel('rpm/pos', color='b')    
+    if POS_CONTROL == True:
+      ax3.set_ylim(0, 5000)
+    else:
+      ax3.set_ylim(0, 10000)
 
     line1, = ax1.plot(x, y1, 'r-') # Returns a tuple of line objects, thus the comma
     line2, = ax2.plot(x, y2, 'g-') # Returns a tuple of line objects, thus the comma
@@ -42,9 +48,10 @@ def get_values_example():
     fig.canvas.draw()
     fig.canvas.flush_events()
     
-    rpm = 0
+    rpm_pos = 0
     voltage = 0
     current = 0
+    angle = 0        
     
     inbuf = b''    
     nextPingTime = time.time() + 2.0
@@ -66,11 +73,13 @@ def get_values_example():
                 if time.time() > nextPingTime:
                   nextPingTime = time.time() + 0.5
                   ser.write(pyvesc.encode_request(GetValues))                                
-                  ser.write(pyvesc.encode(SetRPM(3000)))
-                # Send SetDutyCycle (100% = 100000)
-                  #ser.write(pyvesc.encode(SetDutyCycle(5000))) 
-                #Set rotor postion 
-                  #ser.write(pyvesc.encode(SetPosition(250)))
+                  if POS_CONTROL == True:                  
+                    ser.write(pyvesc.encode(SetPosition(angle)))
+                    angle = (angle + 10) % 360                  
+                  else:
+                    ser.write(pyvesc.encode(SetRPM(3000)))                  
+                  # Send SetDutyCycle (100% = 100000)
+                  #ser.write(pyvesc.encode(SetDutyCycle(5000)))                                     
                   # plot
                   y1 = y1[1:]
                   y1 = np.append(y1, voltage)
@@ -81,7 +90,7 @@ def get_values_example():
                   line2.set_ydata(y2)
                   
                   y3 = y3[1:]
-                  y3 = np.append(y3, rpm)
+                  y3 = np.append(y3, rpm_pos)
                   line3.set_ydata(y3)                      
                   
                   fig.canvas.draw()
@@ -102,8 +111,13 @@ def get_values_example():
                             #print("response " + str(response.id))
                             if isinstance(response, GetFirmwareVersion):
                               print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
-                            elif isinstance(response, GetValues):                              
-                              rpm = response.rpm
+                            elif isinstance(response, GetRotorPosition):
+                              if POS_CONTROL == True:
+                                rpm_pos = response.rotor_pos
+                                print("pos: " + str(rpm_pos))
+                            elif isinstance(response, GetValues):
+                              if POS_CONTROL == False:
+                                rpm_pos = response.rpm
                               voltage = response.input_voltage
                               current = response.avg_motor_current
                               print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
