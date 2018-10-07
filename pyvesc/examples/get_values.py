@@ -114,7 +114,7 @@ def get_values_example():
                             elif isinstance(response, GetRotorPosition):
                               if POS_CONTROL == True:
                                 rpm_pos = response.rotor_pos
-                                print("pos: " + str(rpm_pos))
+                                #print("pos: " + str(rpm_pos))
                             elif isinstance(response, GetValues):
                               if POS_CONTROL == False:
                                 rpm_pos = response.rpm
