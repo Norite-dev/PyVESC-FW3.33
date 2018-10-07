@@ -4,6 +4,7 @@
 from pyvesc.messages.base import VESCMessage
 
 
+
 class SetDutyCycle(metaclass=VESCMessage):
     """ Set the duty cycle.
 
@@ -81,7 +82,7 @@ class SetRotorPositionMode(metaclass=VESCMessage):
     DISP_POS_MODE_PID_POS_ERROR = 5
     DISP_POS_MODE_ENCODER_OBSERVER_ERROR = 6
     
-    id = 10
+    id = 11
     can_id = None
     fields = [
         ('pos_mode', 'b')

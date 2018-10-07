@@ -66,7 +66,7 @@ def get_values_example():
             # Optional: Turn on rotor position reading if an encoder is installed
             ser.write(pyvesc.encode_request(GetFirmwareVersion))                                                            
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_OFF)))                 
-            #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_ENCODER)))                        
+            ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_ENCODER)))                        
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_OBSERVER)))                                    
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_PID_POS)))
             
@@ -82,8 +82,7 @@ def get_values_example():
                   nextPingTime = time.time() + 0.5                                                      
                   ser.write(pyvesc.encode_request(GetValues))                                
                   if POS_CONTROL == True:                  
-                    ser.write(pyvesc.encode(SetPosition(set_value/10))) # degree
-                    #ser.write(pyvesc.encode_request(GetRotorPosition))                                
+                    ser.write(pyvesc.encode(SetPosition(set_value/10))) # degree                    
                     set_value = (set_value + 100) % 3600                 
                   else:
                     ser.write(pyvesc.encode(SetRPM(set_value)))                  
@@ -125,7 +124,7 @@ def get_values_example():
                             if isinstance(response, GetFirmwareVersion):
                               print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
                             elif isinstance(response, GetRotorPosition):                              
-                              print("pos: " + str(response.rotor_pos))
+                              #print("pos: " + str(response.rotor_pos))
                               if POS_CONTROL == True:
                                 rpm_pos = response.rotor_pos                                                                
                             elif isinstance(response, GetValues):
