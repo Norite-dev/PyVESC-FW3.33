@@ -20,6 +20,7 @@ def get_values_example():
     y1 = np.linspace(0, 0, 100)
     y2 = np.linspace(0, 0, 100)
     y3 = np.linspace(0, 0, 100)
+    y4 = np.linspace(0, 0, 100)    
 
     # You probably won't need this if you're embedding things in a tkinter plot...
     plt.ion()
@@ -38,20 +39,22 @@ def get_values_example():
     ax3.set_ylabel('rpm/pos', color='b')    
     if POS_CONTROL == True:
       ax3.set_ylim(0, 5000)
+      set_value = 0
     else:
       ax3.set_ylim(0, 10000)
-
+      set_value = 3000
+          
     line1, = ax1.plot(x, y1, 'r-') # Returns a tuple of line objects, thus the comma
     line2, = ax2.plot(x, y2, 'g-') # Returns a tuple of line objects, thus the comma
     line3, = ax3.plot(x, y3, 'b-') # Returns a tuple of line objects, thus the comma
+    line4, = ax3.plot(x, y4, 'y-') # Returns a tuple of line objects, thus the comma
     ax1.grid()
     fig.canvas.draw()
     fig.canvas.flush_events()
-    
+        
     rpm_pos = 0
     voltage = 0
-    current = 0
-    angle = 0        
+    current = 0    
     
     inbuf = b''    
     nextPingTime = time.time() + 2.0
@@ -74,10 +77,10 @@ def get_values_example():
                   nextPingTime = time.time() + 0.5
                   ser.write(pyvesc.encode_request(GetValues))                                
                   if POS_CONTROL == True:                  
-                    ser.write(pyvesc.encode(SetPosition(angle)))
-                    angle = (angle + 10) % 360                  
+                    ser.write(pyvesc.encode(SetPosition(set_value/10))) # degree
+                    set_value = (set_value + 100) % 3600                 
                   else:
-                    ser.write(pyvesc.encode(SetRPM(3000)))                  
+                    ser.write(pyvesc.encode(SetRPM(set_value)))                  
                   # Send SetDutyCycle (100% = 100000)
                   #ser.write(pyvesc.encode(SetDutyCycle(5000)))                                     
                   # plot
@@ -92,6 +95,10 @@ def get_values_example():
                   y3 = y3[1:]
                   y3 = np.append(y3, rpm_pos)
                   line3.set_ydata(y3)                      
+                  
+                  y4 = y4[1:]
+                  y4 = np.append(y4, set_value)
+                  line4.set_ydata(y4)                      
                   
                   fig.canvas.draw()
                   fig.canvas.flush_events()
