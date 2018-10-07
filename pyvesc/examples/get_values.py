@@ -4,12 +4,14 @@ import serial
 import time
 import matplotlib.pyplot as plt
 import numpy as np
+import struct
 
 # Set your serial port here (either /dev/ttyX or COMX)
 #serialport = '/dev/tty.usbmodem301'
 serialport = 'COM5'
 
 print("port " + serialport)
+
 
 
 def get_values_example():    
@@ -123,15 +125,16 @@ def get_values_example():
                             #print("response " + str(response.id))
                             if isinstance(response, GetFirmwareVersion):
                               print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
-                            elif isinstance(response, GetRotorPosition):                              
-                              #print("pos: " + str(response.rotor_pos))
-                              if POS_CONTROL == True:                                                                
-                                rpm_pos = response.rotor_pos # degree
+                            elif isinstance(response, GetRotorPosition):                                                            
+                              if POS_CONTROL == True:                                                                                                
+                                rpm_pos = response.rotor_pos                                
+                                #print("pos: " + str(rpm_pos))
                             elif isinstance(response, GetValues):
                               if POS_CONTROL == False:
                                 rpm_pos = response.rpm
                               voltage = response.input_voltage
                               current = response.avg_motor_current
+                              # tacho: one rotation = (pole_counts * 3) 
                               print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
                             else:
                               print("not yet implemented: " + str(response.__class__))
