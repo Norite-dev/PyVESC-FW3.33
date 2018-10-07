@@ -67,6 +67,7 @@ def get_values_example():
             ser.write(pyvesc.encode_request(GetFirmwareVersion))                                                            
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_OFF)))                 
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_ENCODER)))                        
+            #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_OBSERVER)))                                    
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_PID_POS)))
             
             
@@ -78,10 +79,11 @@ def get_values_example():
 
                 # Request the current measurement from the vesc                                
                 if time.time() > nextPingTime:
-                  nextPingTime = time.time() + 0.5                  
+                  nextPingTime = time.time() + 0.5                                                      
                   ser.write(pyvesc.encode_request(GetValues))                                
                   if POS_CONTROL == True:                  
                     ser.write(pyvesc.encode(SetPosition(set_value/10))) # degree
+                    #ser.write(pyvesc.encode_request(GetRotorPosition))                                
                     set_value = (set_value + 100) % 3600                 
                   else:
                     ser.write(pyvesc.encode(SetRPM(set_value)))                  
@@ -123,7 +125,7 @@ def get_values_example():
                             if isinstance(response, GetFirmwareVersion):
                               print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
                             elif isinstance(response, GetRotorPosition):                              
-                              #print("pos: " + str(response.rotor_pos))
+                              print("pos: " + str(response.rotor_pos))
                               if POS_CONTROL == True:
                                 rpm_pos = response.rotor_pos                                                                
                             elif isinstance(response, GetValues):
@@ -131,7 +133,7 @@ def get_values_example():
                                 rpm_pos = response.rpm
                               voltage = response.input_voltage
                               current = response.avg_motor_current
-                              print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
+                              print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(rpm_pos) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
                             else:
                               print("not yet implemented: " + str(response.__class__))
                               

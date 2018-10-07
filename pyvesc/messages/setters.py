@@ -74,10 +74,13 @@ class SetRotorPositionMode(metaclass=VESCMessage):
     """
 
     DISP_POS_OFF = 0
+    DISP_POS_MODE_INDUCTANCE = 1
+    DISP_POS_MODE_OBSERVER = 2
     DISP_POS_MODE_ENCODER = 3
     DISP_POS_MODE_PID_POS = 4
     DISP_POS_MODE_PID_POS_ERROR = 5
-
+    DISP_POS_MODE_ENCODER_OBSERVER_ERROR = 6
+    
     id = 10
     can_id = None
     fields = [
