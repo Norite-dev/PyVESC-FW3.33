@@ -64,8 +64,12 @@ def get_values_example():
             ser.flushInput()
             ser.flushOutput()
             # Optional: Turn on rotor position reading if an encoder is installed
-            ser.write(pyvesc.encode_request(GetFirmwareVersion))                                    
+            ser.write(pyvesc.encode_request(GetFirmwareVersion))                                                            
+            #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_OFF)))                 
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_ENCODER)))                        
+            #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_PID_POS)))
+            
+            
             while True:
                 # Set the ERPM of the VESC motor
                 #    Note: if you want to set the real RPM you can set a scalar
@@ -74,7 +78,7 @@ def get_values_example():
 
                 # Request the current measurement from the vesc                                
                 if time.time() > nextPingTime:
-                  nextPingTime = time.time() + 0.5
+                  nextPingTime = time.time() + 0.5                  
                   ser.write(pyvesc.encode_request(GetValues))                                
                   if POS_CONTROL == True:                  
                     ser.write(pyvesc.encode(SetPosition(set_value/10))) # degree
@@ -118,16 +122,18 @@ def get_values_example():
                             #print("response " + str(response.id))
                             if isinstance(response, GetFirmwareVersion):
                               print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
-                            elif isinstance(response, GetRotorPosition):
+                            elif isinstance(response, GetRotorPosition):                              
+                              #print("pos: " + str(response.rotor_pos))
                               if POS_CONTROL == True:
-                                rpm_pos = response.rotor_pos
-                                #print("pos: " + str(rpm_pos))
+                                rpm_pos = response.rotor_pos                                                                
                             elif isinstance(response, GetValues):
                               if POS_CONTROL == False:
                                 rpm_pos = response.rpm
                               voltage = response.input_voltage
                               current = response.avg_motor_current
                               print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
+                            else:
+                              print("not yet implemented: " + str(response.__class__))
                               
                         except:
                             # ToDo: Figure out how to isolate rotor position and other sensor data
