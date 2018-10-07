@@ -50,5 +50,5 @@ class GetRotorPosition(metaclass=VESCMessage):
     can_id = None
 
     fields = [
-            ('rotor_pos', 'i', 10000)
+            ('rotor_pos', 'i', 100000)
     ]

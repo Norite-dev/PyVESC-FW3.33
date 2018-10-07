@@ -38,7 +38,7 @@ def get_values_example():
     ax3 = ax2.twinx()
     ax3.set_ylabel('rpm/pos', color='b')    
     if POS_CONTROL == True:
-      ax3.set_ylim(0, 5000)
+      ax3.set_ylim(0, 360)
       set_value = 0
     else:
       ax3.set_ylim(0, 10000)
@@ -82,8 +82,8 @@ def get_values_example():
                   nextPingTime = time.time() + 0.5                                                      
                   ser.write(pyvesc.encode_request(GetValues))                                
                   if POS_CONTROL == True:                  
-                    ser.write(pyvesc.encode(SetPosition(set_value/10))) # degree                    
-                    set_value = (set_value + 100) % 3600                 
+                    ser.write(pyvesc.encode(SetPosition(set_value))) # degree                    
+                    set_value = (set_value + 10) % 360                 
                   else:
                     ser.write(pyvesc.encode(SetRPM(set_value)))                  
                   # Send SetDutyCycle (100% = 100000)
@@ -125,14 +125,14 @@ def get_values_example():
                               print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
                             elif isinstance(response, GetRotorPosition):                              
                               #print("pos: " + str(response.rotor_pos))
-                              if POS_CONTROL == True:
-                                rpm_pos = response.rotor_pos                                                                
+                              if POS_CONTROL == True:                                                                
+                                rpm_pos = response.rotor_pos # degree
                             elif isinstance(response, GetValues):
                               if POS_CONTROL == False:
                                 rpm_pos = response.rpm
                               voltage = response.input_voltage
                               current = response.avg_motor_current
-                              print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(rpm_pos) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
+                              print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
                             else:
                               print("not yet implemented: " + str(response.__class__))
                               
