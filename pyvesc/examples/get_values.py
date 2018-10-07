@@ -15,7 +15,10 @@ print("port " + serialport)
 
 
 def get_values_example():    
-    # True: position control, False: speed control
+    #  
+    #  choose VESC control mode:
+    #    True: position control
+    #    False: speed control
     POS_CONTROL = True
     
     x = np.linspace(0, 100, 100)
@@ -44,7 +47,7 @@ def get_values_example():
       set_value = 0
     else:
       ax3.set_ylim(0, 10000)
-      set_value = 3000
+      set_value = 3000  # set-speed
           
     line1, = ax1.plot(x, y1, 'r-') # Returns a tuple of line objects, thus the comma
     line2, = ax2.plot(x, y2, 'g-') # Returns a tuple of line objects, thus the comma
@@ -59,7 +62,9 @@ def get_values_example():
     current = 0    
     
     inbuf = b''    
-    nextPingTime = time.time() + 2.0
+    nextCmdTime = time.time() + 2.0
+    nextPlotTime = time.time()
+    nextInfoTime = time.time()
     
     with serial.Serial(serialport, baudrate=115200, timeout=0.05) as ser:
         try:
@@ -79,17 +84,24 @@ def get_values_example():
                 #          manually in setters.py
                 #          12 poles and 19:1 gearbox would have a scalar of 1/228                
 
-                # Request the current measurement from the vesc                                
-                if time.time() > nextPingTime:
-                  nextPingTime = time.time() + 0.5                                                      
+                # Request the current measurement from the vesc                                                
+                
+                if time.time() > nextInfoTime:
+                  nextInfoTime = time.time() + 0.5                                                      
                   ser.write(pyvesc.encode_request(GetValues))                                
+                
+                if time.time() > nextCmdTime:
+                  nextCmdTime = time.time() + 0.5                                                                        
                   if POS_CONTROL == True:                  
-                    ser.write(pyvesc.encode(SetPosition(set_value))) # degree                    
-                    set_value = (set_value + 10) % 360                 
+                    set_value = (set_value + 10) % 360                     
+                    ser.write(pyvesc.encode(SetPosition(set_value))) # degree                                        
                   else:
                     ser.write(pyvesc.encode(SetRPM(set_value)))                  
                   # Send SetDutyCycle (100% = 100000)
-                  #ser.write(pyvesc.encode(SetDutyCycle(5000)))                                     
+                  #ser.write(pyvesc.encode(SetDutyCycle(5000)))
+                  
+                if time.time() > nextPlotTime:
+                  nextPlotTime = time.time() + 0.5                                                                        
                   # plot
                   y1 = y1[1:]
                   y1 = np.append(y1, voltage)
@@ -112,41 +124,42 @@ def get_values_example():
 
                 time.sleep(0.01)
                 
-                # Check if there is enough data back for a measurement
+                # Check if there is enough data back for a measurement                
                 if ser.in_waiting > 0:                   
                   inbuf += ser.read(ser.in_waiting)                 
                 if len(inbuf) > 59:
-                    (response, consumed) = pyvesc.decode(inbuf)
-                    if consumed > 0:                
-                        #print("consumed " + str(consumed))                
-                        inbuf = inbuf[consumed:]
-                        # Print out the values
-                        try:                                                
-                            #print("response " + str(response.id))
-                            if isinstance(response, GetFirmwareVersion):
-                              print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
-                            elif isinstance(response, GetRotorPosition):                                                            
-                              if POS_CONTROL == True:                                                                                                
-                                rpm_pos = response.rotor_pos                                
-                                #print("pos: " + str(rpm_pos))
-                            elif isinstance(response, GetValues):
-                              if POS_CONTROL == False:
-                                rpm_pos = response.rpm
-                              voltage = response.input_voltage
-                              current = response.avg_motor_current
-                              # tacho: one rotation = (pole_counts * 3) 
-                              print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
-                            else:
-                              print("not yet implemented: " + str(response.__class__))
-                              
-                        except:
-                            # ToDo: Figure out how to isolate rotor position and other sensor data
-                            #       in the incoming datastream
-                            #try:
-                            #    print(response.rotor_pos)
-                            #except:
-                            #    pass
-                            pass
+                  while len(inbuf) > 59:                  
+                      (response, consumed) = pyvesc.decode(inbuf)
+                      if consumed > 0:                
+                          #print("consumed " + str(consumed))                
+                          inbuf = inbuf[consumed:]
+                          # Print out the values
+                          try:                                                
+                              #print("response " + str(response.id))
+                              if isinstance(response, GetFirmwareVersion):
+                                print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
+                              elif isinstance(response, GetRotorPosition):                                                            
+                                if POS_CONTROL == True:                                                                                                
+                                  rpm_pos = response.rotor_pos                                
+                                  #print("pos: " + str(rpm_pos))
+                              elif isinstance(response, GetValues):
+                                if POS_CONTROL == False:
+                                  rpm_pos = response.rpm
+                                voltage = response.input_voltage
+                                current = response.avg_motor_current
+                                # tacho: one rotation = (pole_counts * 3) 
+                                print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
+                              else:
+                                print("not yet implemented: " + str(response.__class__))
+                                
+                          except:
+                              # ToDo: Figure out how to isolate rotor position and other sensor data
+                              #       in the incoming datastream
+                              #try:
+                              #    print(response.rotor_pos)
+                              #except:
+                              #    pass
+                              pass
 
                   
 
