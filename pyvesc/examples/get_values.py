@@ -43,10 +43,10 @@ def get_values_example():
     ax3 = ax2.twinx()
     ax3.set_ylabel('rpm/pos', color='b')    
     if POS_CONTROL == True:
-      ax3.set_ylim(0, 360)
+      ax3.set_ylim(0, 360*10)   # angle range
       set_value = 0
     else:
-      ax3.set_ylim(0, 10000)
+      ax3.set_ylim(0, 10000) # rpm range
       set_value = 3000  # set-speed
           
     line1, = ax1.plot(x, y1, 'r-') # Returns a tuple of line objects, thus the comma
@@ -90,7 +90,7 @@ def get_values_example():
                 if time.time() > nextInfoTime:
                   nextInfoTime = time.time() + 0.5                                                      
                   ser.write(pyvesc.encode_request(GetValues))                                
-                  ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
+                  #ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
                 
                 if time.time() > nextCmdTime:
                   nextCmdTime = time.time() + 0.5                                                                        
@@ -114,7 +114,7 @@ def get_values_example():
                   line2.set_ydata(y2)
                   
                   y3 = y3[1:]
-                  y3 = np.append(y3, rpm_pos_cum) # append rpm or position
+                  y3 = np.append(y3, rpm_pos) # append rpm or position
                   line3.set_ydata(y3)                      
                   
                   y4 = y4[1:]
