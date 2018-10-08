@@ -10,7 +10,7 @@ class SetDutyCycle(metaclass=VESCMessage):
 
     :ivar duty_cycle: Value of duty cycle to be set (range [-1e5, 1e5]).
     """
-    id = 5
+    id = 5   # COMM_SET_DUTY
     can_id = None
     fields = [
         ('duty_cycle', 'i')
@@ -22,7 +22,7 @@ class SetRPM(metaclass=VESCMessage):
 
     :ivar rpm: Value to set the RPM to.
     """
-    id = 8
+    id = 8  # COMM_SET_RPM
     can_id = None
     fields = [
         ('rpm', 'i')
@@ -34,7 +34,7 @@ class SetCurrent(metaclass=VESCMessage):
 
     :ivar current: Value to set the current to (in milliamps).
     """
-    id = 6
+    id = 6  # COMM_SET_CURRENT
     fields = [
         ('current', 'i')
     ]
@@ -45,7 +45,7 @@ class SetCurrentBrake(metaclass=VESCMessage):
 
     :ivar current_brake: Value to set the current brake to (in milliamps).
     """
-    id = 7
+    id = 7  # 	COMM_SET_CURRENT_BRAKE
     can_id = None
     fields = [
         ('current_brake', 'i')
@@ -56,7 +56,7 @@ class SetPosition(metaclass=VESCMessage):
     
     :ivar pos: Value to set the current position or angle to.
     """
-    id = 9
+    id = 9  # COMM_SET_POS
     can_id = None
     fields = [
         ('pos', 'i', 1000000)
@@ -82,8 +82,17 @@ class SetRotorPositionMode(metaclass=VESCMessage):
     DISP_POS_MODE_PID_POS_ERROR = 5
     DISP_POS_MODE_ENCODER_OBSERVER_ERROR = 6
     
-    id = 11
+    id = 11  #  COMM_SET_DETECT
     can_id = None
     fields = [
         ('pos_mode', 'b')
     ]
+
+    
+class SetCurrentGetPosCumulative(metaclass=VESCMessage):    
+    id = 39  # COMM_SET_CURRENT_GET_POSITION
+    fields = [
+        ('current', 'i')
+    ]
+
+    

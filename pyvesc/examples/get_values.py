@@ -1,5 +1,5 @@
 import pyvesc
-from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition
+from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition, GetRotorPositionCumulative, SetCurrentGetPosCumulative
 import serial
 import time
 import matplotlib.pyplot as plt
@@ -58,6 +58,7 @@ def get_values_example():
     fig.canvas.flush_events()
         
     rpm_pos = 0
+    rpm_pos_cum = 0
     voltage = 0
     current = 0    
     
@@ -89,6 +90,7 @@ def get_values_example():
                 if time.time() > nextInfoTime:
                   nextInfoTime = time.time() + 0.5                                                      
                   ser.write(pyvesc.encode_request(GetValues))                                
+                  ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
                 
                 if time.time() > nextCmdTime:
                   nextCmdTime = time.time() + 0.5                                                                        
@@ -102,21 +104,21 @@ def get_values_example():
                   
                 if time.time() > nextPlotTime:
                   nextPlotTime = time.time() + 0.5                                                                        
-                  # plot
+                  # append to plots
                   y1 = y1[1:]
-                  y1 = np.append(y1, voltage)
+                  y1 = np.append(y1, voltage) # append voltage
                   line1.set_ydata(y1)
                   
                   y2 = y2[1:]
-                  y2 = np.append(y2, current)
+                  y2 = np.append(y2, current)  # append current
                   line2.set_ydata(y2)
                   
                   y3 = y3[1:]
-                  y3 = np.append(y3, rpm_pos)
+                  y3 = np.append(y3, rpm_pos_cum) # append rpm or position
                   line3.set_ydata(y3)                      
                   
                   y4 = y4[1:]
-                  y4 = np.append(y4, set_value)
+                  y4 = np.append(y4, set_value) # append set-value
                   line4.set_ydata(y4)                      
                   
                   fig.canvas.draw()
@@ -142,6 +144,9 @@ def get_values_example():
                                 if POS_CONTROL == True:                                                                                                
                                   rpm_pos = response.rotor_pos                                
                                   #print("pos: " + str(rpm_pos))
+                              elif isinstance(response, GetRotorPositionCumulative):
+                                rpm_pos_cum = response.rotor_pos                                
+                                print("pos_cum: " + str(rpm_pos_cum))
                               elif isinstance(response, GetValues):
                                 if POS_CONTROL == False:
                                   rpm_pos = response.rpm

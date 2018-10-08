@@ -4,7 +4,7 @@
 from pyvesc.messages.base import VESCMessage
 
 class GetFirmwareVersion(metaclass=VESCMessage):        
-    id = 0
+    id = 0 # COMM_FW_VERSION 
     can_id = None
 
     fields = [
@@ -17,7 +17,7 @@ class GetFirmwareVersion(metaclass=VESCMessage):
 class GetValues(metaclass=VESCMessage):    
     """ Gets internal sensor data
     """
-    id = 4
+    id = 4 #  COMM_GET_VALUES
     can_id = None
 
     fields = [
@@ -46,9 +46,19 @@ class GetRotorPosition(metaclass=VESCMessage):
     Must be set to DISP_POS_MODE_ENCODER or DISP_POS_MODE_PID_POS (Mode 3 or 
     Mode 4). This is set by SetRotorPositionMode (id=21).
     """
-    id = 22
+    id = 22  # COMM_ROTOR_POSITION
     can_id = None
 
     fields = [
             ('rotor_pos', 'i', 100000)
     ]
+
+class GetRotorPositionCumulative(metaclass=VESCMessage):    
+    id = 38  # COMM_ROTOR_POSITION_CUMULATIVE
+    can_id = None
+
+    fields = [
+            ('rotor_pos', 'i', 1)
+    ]
+
+        
