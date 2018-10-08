@@ -71,7 +71,7 @@ class SetPositionLarge(metaclass=VESCMessage):
     can_id = None
     fields = [
         ('pos', 'i', 100000)
-    
+    ]
     
 class SetRotorPositionMode(metaclass=VESCMessage):
     """Sets the rotor position feedback mode.
