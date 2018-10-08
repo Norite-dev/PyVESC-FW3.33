@@ -95,7 +95,7 @@ def get_values_example():
                 if time.time() > nextCmdTime:
                   nextCmdTime = time.time() + 0.5                                                                        
                   if POS_CONTROL == True:                  
-                    set_value = (set_value + 10) % 360                     
+                    set_value = (set_value + 10) % 3600                     
                     ser.write(pyvesc.encode(SetPosition(set_value))) # degree                                        
                   else:
                     ser.write(pyvesc.encode(SetRPM(set_value)))                  
