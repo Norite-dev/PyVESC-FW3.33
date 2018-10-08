@@ -62,12 +62,12 @@ class SetPosition(metaclass=VESCMessage):
         ('pos', 'i', 1000000)
     ]
     
-class SetPositionLarge(metaclass=VESCMessage):
+class SetPositionCumulative(metaclass=VESCMessage):
     """Set the rotor angle based off of an encoder or sensor
     
     :ivar pos: Value to set the current position or angle to.
     """
-    id = 40  # COMM_SET_POS_LARGE
+    id = 40  # COMM_SET_POS_CUMULATIVE
     can_id = None
     fields = [
         ('pos', 'i', 100000)
