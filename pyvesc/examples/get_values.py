@@ -1,6 +1,7 @@
 import pyvesc
 from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition, GetRotorPositionCumulative, SetCurrentGetPosCumulative, SetPositionCumulative
 import serial
+import math
 import time
 import matplotlib.pyplot as plt
 import numpy as np
@@ -93,9 +94,9 @@ def get_values_example():
                   #ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
                 
                 if time.time() > nextCmdTime:
-                  nextCmdTime = time.time() + 0.5                                                                        
-                  if POS_CONTROL == True:                  
-                    set_value = (set_value + 100) % 3600                     
+                  nextCmdTime = time.time() + 0.2                                                                        
+                  if POS_CONTROL == True:                                      
+                    set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 1800 + 1800                     
                     ser.write(pyvesc.encode(SetPositionCumulative(set_value))) # degree                                        
                   else:
                     ser.write(pyvesc.encode(SetRPM(set_value)))                  
