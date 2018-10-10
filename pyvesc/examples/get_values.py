@@ -89,7 +89,7 @@ def get_values_example():
                 # Request the current measurement from the vesc                                                
                 
                 if time.time() > nextInfoTime:
-                  nextInfoTime = time.time() + 0.5                                                      
+                  nextInfoTime = time.time() + 0.2                                                      
                   ser.write(pyvesc.encode_request(GetValues))                                
                   #ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
                 
