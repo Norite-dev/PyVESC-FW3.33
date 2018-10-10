@@ -9,7 +9,7 @@ import struct
 
 # Set your serial port here (either /dev/ttyX or COMX)
 #serialport = '/dev/tty.usbmodem301'
-serialport = 'COM5'
+serialport = 'COM7'
 
 print("port " + serialport)
 
@@ -94,9 +94,12 @@ def get_values_example():
                   #ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
                 
                 if time.time() > nextCmdTime:
-                  nextCmdTime = time.time() + 0.2                                                                        
+                  nextCmdTime = time.time() + 1                                                                        
                   if POS_CONTROL == True:                                      
                     set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 1800 + 1800                     
+                    #set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 180 + 180
+                    #set_value = (set_value + 10) % 360
+                    #ser.write(pyvesc.encode(SetPosition(set_value))) # degree                                        
                     ser.write(pyvesc.encode(SetPositionCumulative(set_value))) # degree                                        
                   else:
                     ser.write(pyvesc.encode(SetRPM(set_value)))                  
