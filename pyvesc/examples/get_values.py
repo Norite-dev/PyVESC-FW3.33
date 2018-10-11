@@ -60,6 +60,7 @@ def get_values_example():
         
     rpm_pos = 0
     rpm_pos_cum = 0
+    set_speed = 1000
     voltage = 0
     current = 0    
     
@@ -94,13 +95,17 @@ def get_values_example():
                   #ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
                 
                 if time.time() > nextCmdTime:
-                  nextCmdTime = time.time() + 1                                                                        
+                  nextCmdTime = time.time() + 2                                                                        
                   if POS_CONTROL == True:                                      
-                    set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 1800 + 1800                     
+                    #set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 1800 + 1800                     
                     #set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 180 + 180
-                    #set_value = (set_value + 10) % 360
+                    set_value = (set_value + 100) % 3600
                     #ser.write(pyvesc.encode(SetPosition(set_value))) # degree                                        
-                    ser.write(pyvesc.encode(SetPositionCumulative(set_value))) # degree                                        
+                    if set_speed == 1000:
+                      set_speed == 3000
+                    else:
+                      set_speed == 1000
+                    ser.write(pyvesc.encode_request(SetPositionCumulative(set_value, set_speed))) # degree                                        
                   else:
                     ser.write(pyvesc.encode(SetRPM(set_value)))                  
                   # Send SetDutyCycle (100% = 100000)
