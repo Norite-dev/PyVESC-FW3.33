@@ -95,17 +95,17 @@ def get_values_example():
                   #ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
                 
                 if time.time() > nextCmdTime:
-                  nextCmdTime = time.time() + 2                                                                        
+                  nextCmdTime = time.time() + 2  # next command after 2 seconds
                   if POS_CONTROL == True:                                      
                     #set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 1800 + 1800                     
                     #set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 180 + 180
-                    set_value = (set_value + 100) % 3600
+                    set_value = (set_value + 100) % 3600   # increase angle by 100 degree, overflow at 3600 degree
                     #ser.write(pyvesc.encode(SetPosition(set_value))) # degree                                        
-                    if set_speed == 1000:
+                    if set_speed == 1000:  # toggle speed between 1000 and 3000
                       set_speed == 3000
                     else:
                       set_speed == 1000
-                    ser.write(pyvesc.encode_request(SetPositionCumulative(set_value, set_speed))) # degree                                        
+                    ser.write(pyvesc.encode_request(SetPositionCumulative(set_value, set_speed))) # degree, erpm                                         
                   else:
                     ser.write(pyvesc.encode(SetRPM(set_value)))                  
                   # Send SetDutyCycle (100% = 100000)
