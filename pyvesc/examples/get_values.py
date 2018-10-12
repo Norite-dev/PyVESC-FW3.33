@@ -1,5 +1,5 @@
 import pyvesc
-from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition, GetRotorPositionCumulative, SetCurrentGetPosCumulative, SetPositionCumulative, SetTerminalCommand, GetPrint
+from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition, GetRotorPositionCumulative, SetCurrentGetPosCumulative, SetPositionCumulative, SetTerminalCommand, GetPrint, GetConfig, SetConfig
 import serial
 import math
 import time
@@ -13,6 +13,11 @@ serialport = 'COM7'
 
 print("port " + serialport)
 
+
+def dump(cfg):
+   for attr in cfg._field_names:
+       if hasattr( cfg, attr ):
+           print( "cfg.%s = %s" % (attr, getattr(cfg, attr)))
 
 
 def get_values_example():    
@@ -75,6 +80,7 @@ def get_values_example():
             ser.flushOutput()
             # Optional: Turn on rotor position reading if an encoder is installed
             ser.write(pyvesc.encode_request(GetFirmwareVersion))                                                                        
+            ser.write(pyvesc.encode_request(GetConfig))                                                                        
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_OFF)))                 
             ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_ENCODER)))                        
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_OBSERVER)))                                    
@@ -92,7 +98,7 @@ def get_values_example():
                 # Request the current measurement from the vesc                                                
                 
                 if time.time() > nextInfoTime:
-                  nextInfoTime = time.time() + 0.2                                                      
+                  nextInfoTime = time.time() + 0.2                                                     
                   ser.write(pyvesc.encode_request(GetValues))                                
                   #ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
                 
@@ -152,6 +158,8 @@ def get_values_example():
                               #print("response " + str(response.id))                             
                               if isinstance(response, GetFirmwareVersion):                                
                                 print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
+                              elif isinstance(response, GetConfig):                                                            
+                                dump(response)
                               elif isinstance(response, GetRotorPosition):                                                            
                                 if POS_CONTROL == True:                                                                                                
                                   rpm_pos = response.rotor_pos                                
