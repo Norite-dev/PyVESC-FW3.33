@@ -222,8 +222,14 @@ class SetRotorPositionMode(metaclass=VESCMessage):
     
 class SetCurrentGetPosCumulative(metaclass=VESCMessage):    
     id = 39  # COMM_SET_CURRENT_GET_POSITION
+    can_id = None
     fields = [
         ('current', 'i')
     ]
+
+class SetAlive(metaclass=VESCMessage):    
+    id = 30  # COMM_ALIVE
+    can_id = None
+    fields = []
 
     

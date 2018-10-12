@@ -1,5 +1,5 @@
 import pyvesc
-from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition, GetRotorPositionCumulative, SetCurrentGetPosCumulative, SetPositionCumulative, SetTerminalCommand, GetPrint, GetConfig, SetConfig
+from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition, GetRotorPositionCumulative, SetCurrentGetPosCumulative, SetPositionCumulative, SetTerminalCommand, GetPrint, GetConfig, SetConfig, SetAlive
 import serial
 import os
 import math
@@ -90,11 +90,9 @@ def get_values_example():
     ax3 = ax2.twinx()
     ax3.set_ylabel('rpm/pos', color='b')    
     if POS_CONTROL == True:
-      ax3.set_ylim(0, 360*10)   # angle range
-      set_value = 0
+      ax3.set_ylim(0, 360*10)   # angle range    
     else:
-      ax3.set_ylim(0, 10000) # rpm range
-      set_value = 3000  # set-speed
+      ax3.set_ylim(0, 10000) # rpm range      
           
     line1, = ax1.plot(x, y1, 'r-') # Returns a tuple of line objects, thus the comma
     line2, = ax2.plot(x, y2, 'g-') # Returns a tuple of line objects, thus the comma
@@ -104,9 +102,10 @@ def get_values_example():
     fig.canvas.draw()
     fig.canvas.flush_events()
         
-    rpm_pos = 0
-    rpm_pos_cum = 0
-    set_speed = 1000
+    rpm = 0    
+    pos = 0
+    set_rpm = 1000
+    set_pos = 0
     voltage = 0
     current = 0    
     
@@ -142,22 +141,23 @@ def get_values_example():
                 if time.time() > nextInfoTime:
                   nextInfoTime = time.time() + 0.2                                                     
                   ser.write(pyvesc.encode_request(GetValues))                                
+                  ser.write(pyvesc.encode(SetAlive))                                                  
                   #ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
                 
                 if time.time() > nextCmdTime:
                   nextCmdTime = time.time() + 2.0  # next command after 2 seconds
                   if POS_CONTROL == True:                                      
-                    #set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 1800 + 1800                     
-                    #set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 180 + 180
-                    set_value = (set_value + 100) % 3600   # increase angle by 100 degree, overflow at 3600 degree
-                    #ser.write(pyvesc.encode(SetPosition(set_value))) # degree                                        
-                    if set_speed == 1000:  # toggle speed between 1000 and 3000
-                      set_speed == 3000
+                    #set_pos = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 1800 + 1800                     
+                    #set_pos = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 180 + 180
+                    set_pos = (set_pos + 100) % 3600   # increase angle by 100 degree, overflow at 3600 degree
+                    #ser.write(pyvesc.encode(SetPosition(set_pos))) # degree                                        
+                    if set_rpm == 1000:  # toggle speed between 1000 and 3000
+                      set_rpm == 3000
                     else:
-                      set_speed == 1000
-                    ser.write(pyvesc.encode_request(SetPositionCumulative(set_value, set_speed))) # degree, erpm                                         
+                      set_rpm == 1000
+                    ser.write(pyvesc.encode_request(SetPositionCumulative(set_pos, 0))) # degree, erpm                                         
                   else:
-                    ser.write(pyvesc.encode(SetRPM(set_value)))                  
+                    ser.write(pyvesc.encode(SetRPM(set_rpm)))                  
                   # Send SetDutyCycle (100% = 100000)
                   #ser.write(pyvesc.encode(SetDutyCycle(5000)))
                   
@@ -173,11 +173,16 @@ def get_values_example():
                   line2.set_ydata(y2)
                   
                   y3 = y3[1:]
-                  y3 = np.append(y3, rpm_pos) # append rpm or position
-                  line3.set_ydata(y3)                      
-                  
                   y4 = y4[1:]
-                  y4 = np.append(y4, set_value) # append set-value
+                  
+                  if POS_CONTROL == True:
+                    y3 = np.append(y3, pos) # append position
+                    y4 = np.append(y4, set_pos) # append set-pos
+                  else:
+                    y3 = np.append(y3, rpm) # append rpm 
+                    y4 = np.append(y4, set_rpm) # append set-rpm
+                  
+                  line3.set_ydata(y3)                                        
                   line4.set_ydata(y4)                      
                   
                   fig.canvas.draw()
@@ -202,20 +207,18 @@ def get_values_example():
                                 print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
                               elif isinstance(response, GetConfig):                                                            
                                 dump(response)
-                              elif isinstance(response, GetRotorPosition):                                                            
-                                if POS_CONTROL == True:                                                                                                
-                                  rpm_pos = response.rotor_pos                                
-                                  #print("pos: " + str(rpm_pos))
+                              elif isinstance(response, GetRotorPosition):                                                                                            
+                                pos = response.rotor_pos                                
+                                #print("pos: " + str(pos))
                               elif isinstance(response, GetRotorPositionCumulative):
-                                rpm_pos_cum = response.rotor_pos                                
-                                print("pos_cum: " + str(rpm_pos_cum))
+                                pos = response.rotor_pos                                
+                                print("pos_cum: " + str(pos))
                               elif isinstance(response, GetValues):
-                                if POS_CONTROL == False:
-                                  rpm_pos = response.rpm
+                                rpm = response.rpm
                                 voltage = response.input_voltage
                                 current = response.avg_motor_current
                                 # tacho: one rotation = (pole_counts * 3) 
-                                print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
+                                print("pos: " + str(pos) + " T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
                               elif isinstance(response, GetPrint):                                
                                 print("FW>> " + response.msg)
                               else:
