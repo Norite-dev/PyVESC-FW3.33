@@ -70,28 +70,33 @@ class VESCMessage(type):
     @staticmethod
     def unpack(msg_bytes):
         msg_id = struct.unpack_from(VESCMessage._endian_fmt + VESCMessage._id_fmt, msg_bytes, 0)
+        # print("unpacking id=" + str(msg_id) + " len "+str(len(msg_bytes)))
         msg_type = VESCMessage.msg_type(*msg_id)
         data = None
-        if not (msg_type._string_field is None):
-            # string field
-            fmt_wo_string = msg_type._fmt_fields.replace('%u', '')
-            fmt_wo_string = fmt_wo_string.replace('s', '')
-            len_string = len(msg_bytes) - struct.calcsize(VESCMessage._endian_fmt + fmt_wo_string) - 1
-            fmt_w_string = msg_type._fmt_fields % (len_string)
-            data = struct.unpack_from(VESCMessage._endian_fmt + fmt_w_string, msg_bytes, 1)
+        if (len(msg_bytes) <= 1):
+          msg = msg_type()
         else:
-            data = list(struct.unpack_from(VESCMessage._endian_fmt + msg_type._fmt_fields, msg_bytes, 1))
-            for k, field in enumerate(data):
-                try:
-                    data[k] = data[k]/msg_type._field_scalars[k]
-                except (TypeError, IndexError) as e:
-                    pass
-        msg = msg_type(*data)
-        if not (msg_type._string_field is None):
-            string_field_name = msg_type._field_names[msg_type._string_field]
-            setattr(msg,
-                    string_field_name,
-                    getattr(msg, string_field_name).decode('ascii'))
+          if not (msg_type._string_field is None):
+              # string field
+              fmt_wo_string = msg_type._fmt_fields.replace('%u', '')
+              fmt_wo_string = fmt_wo_string.replace('s', '')
+              len_string = len(msg_bytes) - struct.calcsize(VESCMessage._endian_fmt + fmt_wo_string) - 1
+              fmt_w_string = msg_type._fmt_fields % (len_string)
+              data = struct.unpack_from(VESCMessage._endian_fmt + fmt_w_string, msg_bytes, 1)
+          else:
+              data = list(struct.unpack_from(VESCMessage._endian_fmt + msg_type._fmt_fields, msg_bytes, 1))
+              for k, field in enumerate(data):
+                  try:
+                      data[k] = data[k]/msg_type._field_scalars[k]
+                  except (TypeError, IndexError) as e:
+                      pass
+          msg = msg_type(*data)
+        
+          if not (msg_type._string_field is None):
+              string_field_name = msg_type._field_names[msg_type._string_field]
+              setattr(msg,
+                      string_field_name,
+                      getattr(msg, string_field_name).decode('ascii'))
         return msg
 
     @staticmethod
@@ -127,7 +132,7 @@ class VESCMessage(type):
             return struct.pack(fmt, *values)
         else:
             values = ((instance.id,) + tuple(field_values))
-            #print(values)
+            # print(values)
             if instance.can_id is not None:
                 fmt = VESCMessage._endian_fmt + VESCMessage._can_id_fmt + VESCMessage._id_fmt + instance._fmt_fields
                 values = (VESCMessage._comm_forward_can, instance.can_id) + values

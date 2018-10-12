@@ -1,11 +1,13 @@
 import pyvesc
 from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition, GetRotorPositionCumulative, SetCurrentGetPosCumulative, SetPositionCumulative, SetTerminalCommand, GetPrint, GetConfig, SetConfig
 import serial
+import os
 import math
 import time
 import matplotlib.pyplot as plt
 import numpy as np
 import struct
+from xml.dom import minidom
 
 # Set your serial port here (either /dev/ttyX or COMX)
 #serialport = '/dev/tty.usbmodem301'
@@ -18,6 +20,45 @@ def dump(cfg):
    for attr in cfg._field_names:
        if hasattr( cfg, attr ):
            print( "cfg.%s = %s" % (attr, getattr(cfg, attr)))
+           
+
+def test(*args):
+  for arg in args:
+    print(arg)
+
+           
+def sendConfig(ser):    
+    if not os.path.exists('motor1.xml'): 
+      print("no config file found => skipping sendConfig...")
+      return
+    doc = minidom.parse('motor1.xml')               
+    count = 0
+    values = []
+    for field in SetConfig.fields:
+      key = field[0]
+      fmt = field[1]
+      #print(key)
+      item = doc.getElementsByTagName(key)
+      if (len(item) > 0):
+        value = item[0].firstChild.data
+        if (fmt=='B') : value = int(value)
+        if (fmt=='b') : value = int(value)
+        if (fmt=='i') : value = int(value)
+        if (fmt=='I') : value = int(value)
+        if (fmt=='f') : value = float(value) 
+        try:
+          struct.pack(fmt, value)
+        except Exception as e:
+          print("ERROR! " + key + " ["+fmt+"]" + " = " + str(value) + ": " + str(e))
+        values.append(value)
+        count=count+1
+      else:
+        print("error finding field in config: "+field[0])
+    print("found config fields: "+str(count))
+    ser.write(pyvesc.encode(SetConfig(*values)))                            
+    print("config sent")
+    #test(*values)
+    
 
 
 def get_values_example():    
@@ -80,7 +121,8 @@ def get_values_example():
             ser.flushOutput()
             # Optional: Turn on rotor position reading if an encoder is installed
             ser.write(pyvesc.encode_request(GetFirmwareVersion))                                                                        
-            ser.write(pyvesc.encode_request(GetConfig))                                                                        
+            #ser.write(pyvesc.encode_request(GetConfig))                                                                        
+            sendConfig(ser)
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_OFF)))                 
             ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_ENCODER)))                        
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_OBSERVER)))                                    
@@ -199,7 +241,8 @@ def get_values_example():
             
 
 if __name__ == "__main__":
-    #signal.signal(signal.SIGINT, signal_handler)
+    #signal.signal(signal.SIGINT, signal_handler)    
     get_values_example()
 
     
+
