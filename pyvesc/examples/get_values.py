@@ -140,7 +140,7 @@ def get_values_example():
             if state == STATE_CALIBRATE:
               #ser.write(pyvesc.encode(SetCurrent(15000)))                                                           
               #ser.write(pyvesc.encode_request(GetDetectEncoder))                                                              
-              ser.write(pyvesc.encode(SetTerminalCommand('foc_encoder_detect 15')))                                                                         
+              ser.write(pyvesc.encode(SetTerminalCommand('foc_encoder_detect 12')))                                                                         
                                     
             
             while True:
@@ -207,38 +207,40 @@ def get_values_example():
                   while ser.in_waiting > 0:                   
                     inbuf += ser.read(ser.in_waiting)                                   
                   if len(inbuf) == 0: break
-                  if (len(inbuf) != dataAvail):                  
-                    if (len(inbuf) <= 59): break                  
+                  #if (len(inbuf) != dataAvail):                  
+                  #  if (len(inbuf) <= 59): break                  
                   
                   (response, consumed) = pyvesc.decode(inbuf)
-                  if consumed > 0:                
-                      #print(str(time.time()) + " consumed " + str(consumed) + ", " + str(response.__class__))                
-                      inbuf = inbuf[consumed:]                      
-                      dataAvail = len(inbuf)
-                      #print("response " + str(response.id))                             
-                      if isinstance(response, GetFirmwareVersion):                                
-                        print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
-                      elif isinstance(response, GetConfig):                                                            
-                        dump(response)
-                      elif isinstance(response, GetRotorPosition):                                                                                            
-                        pos = response.rotor_pos                                
-                        #print("pos: " + str(pos))
-                      elif isinstance(response, GetRotorPositionCumulative):
-                        pos = response.rotor_pos                                
-                        print("pos_cum: " + str(pos))
-                      elif isinstance(response, GetValues):
-                        rpm = response.rpm
-                        voltage = response.input_voltage
-                        current = response.avg_motor_current
-                        # tacho: one rotation = (pole_counts * 3) 
-                        print("pos: " + str(pos) + " T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
-                      elif isinstance(response, GetPrint):                                
-                        print("FW>> " + response.msg)
-                      elif isinstance(response, GetDetectEncoder):
-                        dump(response)
-                      else:
-                        print("answer not yet implemented: " + str(response.__class__))
-                                                
+                  if consumed == 0: break                
+                  
+                  #print(str(time.time()) + " consumed " + str(consumed) + ", " + str(response.__class__))                
+                  inbuf = inbuf[consumed:]                      
+                  dataAvail = len(inbuf)
+                  #print("response " + str(response.id))                             
+                  if isinstance(response, GetFirmwareVersion):                                
+                    print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
+                  elif isinstance(response, GetConfig):                                                            
+                    dump(response)
+                  elif isinstance(response, GetRotorPosition):                                                                                            
+                    pos = response.rotor_pos                                
+                    #print("pos: " + str(pos))
+                  elif isinstance(response, GetRotorPositionCumulative):
+                    pos = response.rotor_pos                                
+                    print("pos_cum: " + str(pos))
+                  elif isinstance(response, GetValues):
+                    rpm = response.rpm
+                    voltage = response.input_voltage
+                    current = response.avg_motor_current
+                    # tacho: one rotation = (pole_counts * 3) 
+                    print("pos: " + str(pos) + " T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
+                  elif isinstance(response, GetPrint):                                
+                    print("FW>> " + response.msg)
+                  elif isinstance(response, GetDetectEncoder):
+                    print("GetDetectEncoder")
+                    dump(response)
+                  else:
+                    print("answer not yet implemented: " + str(response.__class__))
+                                            
 
                   
 
