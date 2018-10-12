@@ -95,7 +95,7 @@ def get_values_example():
                   #ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
                 
                 if time.time() > nextCmdTime:
-                  nextCmdTime = time.time() + 2  # next command after 2 seconds
+                  nextCmdTime = time.time() + 2.0  # next command after 2 seconds
                   if POS_CONTROL == True:                                      
                     #set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 1800 + 1800                     
                     #set_value = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 180 + 180
@@ -147,7 +147,9 @@ def get_values_example():
                           # Print out the values
                           try:                                                
                               #print("response " + str(response.id))
-                              if isinstance(response, GetFirmwareVersion):
+                              if isinstance(response, GetPrint):
+                                print("FW>> " + str(response.msg))
+                              elif isinstance(response, GetFirmwareVersion):
                                 print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
                               elif isinstance(response, GetRotorPosition):                                                            
                                 if POS_CONTROL == True:                                                                                                

@@ -3,6 +3,16 @@
 
 from pyvesc.messages.base import VESCMessage
 
+class GetPrint(metaclass=VESCMessage):        
+    id = 21 # COMM_PRINT
+    can_id = None
+
+    fields = [
+            ('msg', 's'),            
+    ]
+
+  
+
 class GetFirmwareVersion(metaclass=VESCMessage):        
     id = 0 # COMM_FW_VERSION 
     can_id = None
