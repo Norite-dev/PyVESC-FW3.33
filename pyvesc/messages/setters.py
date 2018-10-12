@@ -113,7 +113,7 @@ class SetConfig(metaclass=VESCMessage):
             ('m_bldc_f_sw_min', 'f'),                                                
             ('m_bldc_f_sw_max', 'f'),                                                
             ('m_dc_f_sw', 'f'),                                                
-            ('m_ntc_motor_beta', 'f'),                                                            
+            ('m_ntc_motor_beta', 'f')                                                            
     ]
 
 
@@ -132,7 +132,7 @@ class SetDutyCycle(metaclass=VESCMessage):
     id = 5   # COMM_SET_DUTY
     can_id = None
     fields = [
-        ('duty_cycle', 'i')
+        ('duty_cycle', 'i', 1)
     ]
 
 
@@ -144,7 +144,7 @@ class SetRPM(metaclass=VESCMessage):
     id = 8  # COMM_SET_RPM
     can_id = None
     fields = [
-        ('rpm', 'i')
+        ('rpm', 'i', 1)
     ]
 
 
@@ -155,7 +155,7 @@ class SetCurrent(metaclass=VESCMessage):
     """
     id = 6  # COMM_SET_CURRENT
     fields = [
-        ('current', 'i')
+        ('current', 'i', 1)
     ]
 
 
@@ -167,7 +167,7 @@ class SetCurrentBrake(metaclass=VESCMessage):
     id = 7  # 	COMM_SET_CURRENT_BRAKE
     can_id = None
     fields = [
-        ('current_brake', 'i')
+        ('current_brake', 'i', 1)
     ]
 
 class SetPosition(metaclass=VESCMessage):
@@ -190,7 +190,7 @@ class SetPositionCumulative(metaclass=VESCMessage):
     can_id = None
     fields = [
         ('pos', 'i', 100000),
-        ('erpm', 'f')
+        ('erpm', 'f', 1)
     ]
     
 class SetRotorPositionMode(metaclass=VESCMessage):
@@ -216,7 +216,7 @@ class SetRotorPositionMode(metaclass=VESCMessage):
     id = 11  #  COMM_SET_DETECT
     can_id = None
     fields = [
-        ('pos_mode', 'b')
+        ('pos_mode', 'b', 1)
     ]
 
     
@@ -224,7 +224,7 @@ class SetCurrentGetPosCumulative(metaclass=VESCMessage):
     id = 39  # COMM_SET_CURRENT_GET_POSITION
     can_id = None
     fields = [
-        ('current', 'i')
+        ('current', 'i', 1)
     ]
 
 class SetAlive(metaclass=VESCMessage):    

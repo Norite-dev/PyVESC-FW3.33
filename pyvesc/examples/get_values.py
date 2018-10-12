@@ -122,11 +122,15 @@ def get_values_example():
             ser.write(pyvesc.encode_request(GetFirmwareVersion))                                                                        
             #ser.write(pyvesc.encode_request(GetConfig))                                                                        
             sendConfig(ser)
-            #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_OFF)))                 
+            #time.sleep(2)
+            #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_OFF)))                             
             ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_ENCODER)))                        
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_OBSERVER)))                                    
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_PID_POS)))
             
+            # Send SetDutyCycle (100% = 100000)
+            #ser.write(pyvesc.encode(SetDutyCycle(5000)))
+             
             ser.write(pyvesc.encode(SetTerminalCommand('ping')))                        
             
             
@@ -139,27 +143,25 @@ def get_values_example():
                 # Request the current measurement from the vesc                                                
                 
                 if time.time() > nextInfoTime:
-                  nextInfoTime = time.time() + 0.2                                                     
+                  nextInfoTime = time.time() + 0.5                                                     
                   ser.write(pyvesc.encode_request(GetValues))                                
-                  ser.write(pyvesc.encode(SetAlive))                                                  
-                  #ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
+                  ser.write(pyvesc.encode(SetAlive))                                                                    
                 
                 if time.time() > nextCmdTime:
-                  nextCmdTime = time.time() + 2.0  # next command after 2 seconds
+                  nextCmdTime = time.time() + 3.0  # next command after 2 seconds
+                  if set_rpm == 1000:  # toggle speed between 1000 and 3000
+                    set_rpm = 3000
+                  else:
+                    set_rpm = 1000
                   if POS_CONTROL == True:                                      
                     #set_pos = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 1800 + 1800                     
                     #set_pos = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 180 + 180
-                    set_pos = (set_pos + 100) % 3600   # increase angle by 100 degree, overflow at 3600 degree
-                    #ser.write(pyvesc.encode(SetPosition(set_pos))) # degree                                        
-                    if set_rpm == 1000:  # toggle speed between 1000 and 3000
-                      set_rpm == 3000
-                    else:
-                      set_rpm == 1000
-                    ser.write(pyvesc.encode_request(SetPositionCumulative(set_pos, 0))) # degree, erpm                                         
+                    set_pos = (set_pos + 10) % 3600   # increase angle by 100 degree, overflow at 3600 degree                                        
+                    ser.write(pyvesc.encode(SetPosition(set_pos))) # degree                                        
+                    #ser.write(pyvesc.encode(SetPositionCumulative(set_pos, 0))) # degree, erpm                                         
                   else:
                     ser.write(pyvesc.encode(SetRPM(set_rpm)))                  
-                  # Send SetDutyCycle (100% = 100000)
-                  #ser.write(pyvesc.encode(SetDutyCycle(5000)))
+                  
                   
                 if time.time() > nextPlotTime:
                   nextPlotTime = time.time() + 0.5                                                                        
@@ -222,7 +224,7 @@ def get_values_example():
                               elif isinstance(response, GetPrint):                                
                                 print("FW>> " + response.msg)
                               else:
-                                print("not yet implemented: " + str(response.__class__))
+                                print("answer not yet implemented: " + str(response.__class__))
                                 
                           except:
                               # ToDo: Figure out how to isolate rotor position and other sensor data
