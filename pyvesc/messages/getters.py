@@ -185,4 +185,11 @@ class GetRotorPositionCumulative(metaclass=VESCMessage):
             ('rotor_pos', 'i', 1)
     ]
 
+class GetDetectEncoder(metaclass=VESCMessage):    
+    id = 27  # COMM_DETECT_ENCODER
+    can_id = None
+    fields = [
+            ('offset', 'f', 1000000),
+            ('ratio', 'f', 1000000)
+    ]
         

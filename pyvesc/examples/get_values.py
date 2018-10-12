@@ -1,5 +1,5 @@
 import pyvesc
-from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition, GetRotorPositionCumulative, SetCurrentGetPosCumulative, SetPositionCumulative, SetTerminalCommand, GetPrint, GetConfig, SetConfig, SetAlive
+from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition, GetRotorPositionCumulative, SetCurrentGetPosCumulative, SetPositionCumulative, SetTerminalCommand, GetPrint, GetConfig, SetConfig, SetAlive, GetDetectEncoder
 import serial
 import os
 import math
@@ -16,10 +16,16 @@ serialport = 'COM7'
 print("port " + serialport)
 
 
-def dump(cfg):
-   for attr in cfg._field_names:
-       if hasattr( cfg, attr ):
-           print( "cfg.%s = %s" % (attr, getattr(cfg, attr)))
+STATE_OFF         = 0
+STATE_CALIBRATE   = 1
+STATE_CONTROL_POS = 2
+STATE_CONTROL_RPM = 3
+
+
+def dump(obj):
+   for attr in obj._field_names:
+       if hasattr( obj, attr ):
+           print( "%s = %s" % (attr, getattr(obj, attr)))
            
 
 def test(*args):
@@ -63,10 +69,10 @@ def sendConfig(ser):
 
 def get_values_example():    
     #  
-    #  choose VESC control mode:
-    #    True: position control
-    #    False: speed control
-    POS_CONTROL = True
+    #  choose VESC control mode:   
+    #state = STATE_CONTROL_POS
+    #state = STATE_CONTROL_RPM
+    state = STATE_CALIBRATE
     
     x = np.linspace(0, 100, 100)
     y1 = np.linspace(0, 0, 100)
@@ -89,7 +95,7 @@ def get_values_example():
 
     ax3 = ax2.twinx()
     ax3.set_ylabel('rpm/pos', color='b')    
-    if POS_CONTROL == True:
+    if state == STATE_CONTROL_POS:
       ax3.set_ylim(0, 360*10)   # angle range    
     else:
       ax3.set_ylim(0, 10000) # rpm range      
@@ -107,7 +113,8 @@ def get_values_example():
     set_rpm = 1000
     set_pos = 0
     voltage = 0
-    current = 0    
+    current = 0   
+    dataAvail = 0
     
     inbuf = b''    
     nextCmdTime = time.time() + 2.0
@@ -122,17 +129,19 @@ def get_values_example():
             ser.write(pyvesc.encode_request(GetFirmwareVersion))                                                                        
             #ser.write(pyvesc.encode_request(GetConfig))                                                                        
             sendConfig(ser)
-            #time.sleep(2)
-            #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_OFF)))                             
-            ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_ENCODER)))                        
-            #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_OBSERVER)))                                    
-            #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_PID_POS)))
             
-            # Send SetDutyCycle (100% = 100000)
-            #ser.write(pyvesc.encode(SetDutyCycle(5000)))
-             
             ser.write(pyvesc.encode(SetTerminalCommand('ping')))                        
             
+            ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_ENCODER)))                        
+            
+            # Send SetDutyCycle (100% = 100000)
+            #ser.write(pyvesc.encode(SetDutyCycle(5000)))                                    
+            
+            if state == STATE_CALIBRATE:
+              #ser.write(pyvesc.encode(SetCurrent(15000)))                                                           
+              #ser.write(pyvesc.encode_request(GetDetectEncoder))                                                              
+              ser.write(pyvesc.encode(SetTerminalCommand('foc_encoder_detect 15')))                                                                         
+                                    
             
             while True:
                 # Set the ERPM of the VESC motor
@@ -143,23 +152,24 @@ def get_values_example():
                 # Request the current measurement from the vesc                                                
                 
                 if time.time() > nextInfoTime:
-                  nextInfoTime = time.time() + 0.5                                                     
-                  ser.write(pyvesc.encode_request(GetValues))                                
-                  ser.write(pyvesc.encode(SetAlive))                                                                    
+                  nextInfoTime = time.time() + 0.5                                                                       
+                  if state != STATE_CALIBRATE:
+                    ser.write(pyvesc.encode(SetAlive))                                                                    
+                    ser.write(pyvesc.encode_request(GetValues))                                                    
                 
                 if time.time() > nextCmdTime:
-                  nextCmdTime = time.time() + 3.0  # next command after 2 seconds
+                  nextCmdTime = time.time() + 3.0  # next command after 2 seconds                  
                   if set_rpm == 1000:  # toggle speed between 1000 and 3000
                     set_rpm = 3000
                   else:
                     set_rpm = 1000
-                  if POS_CONTROL == True:                                      
+                  if state == STATE_CONTROL_POS:                                      
                     #set_pos = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 1800 + 1800                     
                     #set_pos = math.sin(time.time() % 10.0 / 10.0 * 2 * math.pi) * 180 + 180
                     set_pos = (set_pos + 10) % 3600   # increase angle by 100 degree, overflow at 3600 degree                                        
                     ser.write(pyvesc.encode(SetPosition(set_pos))) # degree                                        
                     #ser.write(pyvesc.encode(SetPositionCumulative(set_pos, 0))) # degree, erpm                                         
-                  else:
+                  if state == STATE_CONTROL_RPM:
                     ser.write(pyvesc.encode(SetRPM(set_rpm)))                  
                   
                   
@@ -177,7 +187,7 @@ def get_values_example():
                   y3 = y3[1:]
                   y4 = y4[1:]
                   
-                  if POS_CONTROL == True:
+                  if state == STATE_CONTROL_POS:
                     y3 = np.append(y3, pos) # append position
                     y4 = np.append(y4, set_pos) # append set-pos
                   else:
@@ -192,57 +202,53 @@ def get_values_example():
 
                 time.sleep(0.01)
                 
-                # Check if there is enough data back for a measurement                
-                if ser.in_waiting > 0:                   
-                  inbuf += ser.read(ser.in_waiting)                 
-                #print(len(inbuf))
-                if len(inbuf) > 59:
-                  while len(inbuf) > 59:                  
-                      (response, consumed) = pyvesc.decode(inbuf)
-                      if consumed > 0:                
-                          #print("consumed " + str(consumed))                
-                          inbuf = inbuf[consumed:]
-                          # Print out the values
-                          try:                                                
-                              #print("response " + str(response.id))                             
-                              if isinstance(response, GetFirmwareVersion):                                
-                                print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
-                              elif isinstance(response, GetConfig):                                                            
-                                dump(response)
-                              elif isinstance(response, GetRotorPosition):                                                                                            
-                                pos = response.rotor_pos                                
-                                #print("pos: " + str(pos))
-                              elif isinstance(response, GetRotorPositionCumulative):
-                                pos = response.rotor_pos                                
-                                print("pos_cum: " + str(pos))
-                              elif isinstance(response, GetValues):
-                                rpm = response.rpm
-                                voltage = response.input_voltage
-                                current = response.avg_motor_current
-                                # tacho: one rotation = (pole_counts * 3) 
-                                print("pos: " + str(pos) + " T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
-                              elif isinstance(response, GetPrint):                                
-                                print("FW>> " + response.msg)
-                              else:
-                                print("answer not yet implemented: " + str(response.__class__))
-                                
-                          except:
-                              # ToDo: Figure out how to isolate rotor position and other sensor data
-                              #       in the incoming datastream
-                              #try:
-                              #    print(response.rotor_pos)
-                              #except:
-                              #    pass
-                              pass
+                # Check if there is enough data back for a measurement                                
+                while (True):
+                  while ser.in_waiting > 0:                   
+                    inbuf += ser.read(ser.in_waiting)                                   
+                  if len(inbuf) == 0: break
+                  if (len(inbuf) != dataAvail):                  
+                    if (len(inbuf) <= 59): break                  
+                  
+                  (response, consumed) = pyvesc.decode(inbuf)
+                  if consumed > 0:                
+                      #print(str(time.time()) + " consumed " + str(consumed) + ", " + str(response.__class__))                
+                      inbuf = inbuf[consumed:]                      
+                      dataAvail = len(inbuf)
+                      #print("response " + str(response.id))                             
+                      if isinstance(response, GetFirmwareVersion):                                
+                        print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
+                      elif isinstance(response, GetConfig):                                                            
+                        dump(response)
+                      elif isinstance(response, GetRotorPosition):                                                                                            
+                        pos = response.rotor_pos                                
+                        #print("pos: " + str(pos))
+                      elif isinstance(response, GetRotorPositionCumulative):
+                        pos = response.rotor_pos                                
+                        print("pos_cum: " + str(pos))
+                      elif isinstance(response, GetValues):
+                        rpm = response.rpm
+                        voltage = response.input_voltage
+                        current = response.avg_motor_current
+                        # tacho: one rotation = (pole_counts * 3) 
+                        print("pos: " + str(pos) + " T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
+                      elif isinstance(response, GetPrint):                                
+                        print("FW>> " + response.msg)
+                      elif isinstance(response, GetDetectEncoder):
+                        dump(response)
+                      else:
+                        print("answer not yet implemented: " + str(response.__class__))
+                                                
 
                   
 
         except KeyboardInterrupt:
             # Turn Off the VESC
             print ("turning off the VESC...")
-            ser.write(pyvesc.encode(SetCurrent(0)))            
+            #ser.write(pyvesc.encode(SetCurrent(0)))            
             ser.flushOutput()
             ser.flushInput()
+            ser.close()
             
 
 if __name__ == "__main__":

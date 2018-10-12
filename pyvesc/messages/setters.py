@@ -232,4 +232,5 @@ class SetAlive(metaclass=VESCMessage):
     can_id = None
     fields = []
 
-    
+
+        
