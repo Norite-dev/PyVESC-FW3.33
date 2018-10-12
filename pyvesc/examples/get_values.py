@@ -1,5 +1,5 @@
 import pyvesc
-from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition, GetRotorPositionCumulative, SetCurrentGetPosCumulative, SetPositionCumulative
+from pyvesc import GetFirmwareVersion, GetValues, SetRPM, SetCurrent, SetRotorPositionMode, GetRotorPosition, SetDutyCycle, SetPosition, GetRotorPositionCumulative, SetCurrentGetPosCumulative, SetPositionCumulative, SetTerminalCommand, GetPrint
 import serial
 import math
 import time
@@ -69,16 +69,18 @@ def get_values_example():
     nextPlotTime = time.time()
     nextInfoTime = time.time()
     
-    with serial.Serial(serialport, baudrate=115200, timeout=0.05) as ser:
+    with serial.Serial(serialport, baudrate=115200, timeout=0) as ser:
         try:
             ser.flushInput()
             ser.flushOutput()
             # Optional: Turn on rotor position reading if an encoder is installed
-            ser.write(pyvesc.encode_request(GetFirmwareVersion))                                                            
+            ser.write(pyvesc.encode_request(GetFirmwareVersion))                                                                        
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_OFF)))                 
             ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_ENCODER)))                        
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_OBSERVER)))                                    
             #ser.write(pyvesc.encode(SetRotorPositionMode(SetRotorPositionMode.DISP_POS_MODE_PID_POS)))
+            
+            ser.write(pyvesc.encode(SetTerminalCommand('ping')))                        
             
             
             while True:
@@ -90,7 +92,7 @@ def get_values_example():
                 # Request the current measurement from the vesc                                                
                 
                 if time.time() > nextInfoTime:
-                  nextInfoTime = time.time() + 0.2                                                      
+                  nextInfoTime = time.time() + 2                                                      
                   ser.write(pyvesc.encode_request(GetValues))                                
                   #ser.write(pyvesc.encode_request(SetCurrentGetPosCumulative(20)))                                
                 
@@ -138,6 +140,7 @@ def get_values_example():
                 # Check if there is enough data back for a measurement                
                 if ser.in_waiting > 0:                   
                   inbuf += ser.read(ser.in_waiting)                 
+                #print(len(inbuf))
                 if len(inbuf) > 59:
                   while len(inbuf) > 59:                  
                       (response, consumed) = pyvesc.decode(inbuf)
@@ -146,10 +149,8 @@ def get_values_example():
                           inbuf = inbuf[consumed:]
                           # Print out the values
                           try:                                                
-                              #print("response " + str(response.id))
-                              if isinstance(response, GetPrint):
-                                print("FW>> " + str(response.msg))
-                              elif isinstance(response, GetFirmwareVersion):
+                              #print("response " + str(response.id))                             
+                              if isinstance(response, GetFirmwareVersion):                                
                                 print("Firmware: " + str(response.version_major) + ", " + str(response.version_minor))
                               elif isinstance(response, GetRotorPosition):                                                            
                                 if POS_CONTROL == True:                                                                                                
@@ -165,6 +166,8 @@ def get_values_example():
                                 current = response.avg_motor_current
                                 # tacho: one rotation = (pole_counts * 3) 
                                 print("T: " + str(response.temp_fet_filtered) + " rpm: "+  str(response.rpm) + " volt: " + str(response.input_voltage) + " curr: " +str(response.avg_motor_current) + " Tachometer:" + str(response.tachometer_value) + " Tachometer ABS:" + str(response.tachometer_abs_value) + " Duty:" + str(response.duty_cycle_now) + " Watt Hours:" + str(response.watt_hours) + " Watt Hours Charged:" + str(response.watt_hours_charged) + " amp Hours:" + str(response.amp_hours) + " amp Hours Charged:" + str(response.amp_hours_charged) + " avg input current:" + str(response.avg_input_current) )
+                              elif isinstance(response, GetPrint):                                
+                                print("FW>> " + response.msg)
                               else:
                                 print("not yet implemented: " + str(response.__class__))
                                 

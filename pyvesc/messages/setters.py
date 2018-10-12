@@ -4,6 +4,12 @@
 from pyvesc.messages.base import VESCMessage
 
 
+class SetTerminalCommand(metaclass=VESCMessage):
+    id = 20   # COMM_TERMINAL_CMD
+    can_id = None
+    fields = [
+        ('msg', 's')
+    ]
 
 class SetDutyCycle(metaclass=VESCMessage):
     """ Set the duty cycle.
