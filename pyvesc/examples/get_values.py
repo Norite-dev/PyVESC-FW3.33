@@ -70,9 +70,9 @@ def sendConfig(ser):
 def get_values_example():    
     #  
     #  choose VESC control mode:   
-    #state = STATE_CONTROL_POS
+    state = STATE_CONTROL_POS
     #state = STATE_CONTROL_RPM
-    state = STATE_CALIBRATE
+    #state = STATE_CALIBRATE
     
     x = np.linspace(0, 100, 100)
     y1 = np.linspace(0, 0, 100)
@@ -138,9 +138,9 @@ def get_values_example():
             #ser.write(pyvesc.encode(SetDutyCycle(5000)))                                    
             
             if state == STATE_CALIBRATE:
-              #ser.write(pyvesc.encode(SetCurrent(15000)))                                                           
+              #ser.write(pyvesc.encode(SetCurrent(10000)))                                                           
               #ser.write(pyvesc.encode_request(GetDetectEncoder))                                                              
-              ser.write(pyvesc.encode(SetTerminalCommand('foc_encoder_detect 12')))                                                                         
+              ser.write(pyvesc.encode(SetTerminalCommand('foc_encoder_detect 10')))                                                                         
                                     
             
             while True:
