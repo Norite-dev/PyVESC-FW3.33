@@ -189,7 +189,7 @@ class SetPositionCumulative(metaclass=VESCMessage):
     can_id = None
     fields = [
         ('pos', 'i', 100000),
-        ('erpm', 'f', 1)
+        ('erpm', 'i', 1)
     ]
     
 class SetRotorPositionMode(metaclass=VESCMessage):
