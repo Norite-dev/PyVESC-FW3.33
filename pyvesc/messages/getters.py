@@ -1,5 +1,4 @@
-# NOTE: this is for VESC firmware 3.33 
-# ( https://github.com/tlalexander/bldc/tree/e74d3a3e4c2047b239084c152b4cbfddafbe3145 )
+# NOTE: this is for VESC modified firmware 3.33  ( https://github.com/raess1/vesc-FW )
 
 from pyvesc.messages.base import VESCMessage
 
